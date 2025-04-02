@@ -52,8 +52,13 @@ class BaseSideWindow(Actuator):
         self.set_line(self.reverse_motor_gpio, action)
         
     def stop_curtain(self):
-        """回転を停止する
         """
+        カーテンの動作を停止します。
+
+        このメソッドは、サイドウィンドウの回転を停止し、カーテンの状態を「ビジーでない」に設定します。
+        また、正転モーターと逆転モーターの両方を非アクティブ状態に設定します。
+        """
+        #日本語でドキュメントを生成してください
         print('stop SideWindow rotation...')
         self.curtain_busy = False
 
