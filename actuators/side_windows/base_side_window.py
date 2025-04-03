@@ -1,11 +1,10 @@
 import asyncio
 import inspect
-import gpiod
 from time import sleep
 from actuators.base_actuators.calc_aperture import get_aperture
 from actuators.base_actuators.base_actuator import Actuator
 from config import settings
-from gpiod.line import Direction, Value
+from gpiod.line import Value
 
 
 class BaseSideWindow(Actuator):
@@ -107,9 +106,10 @@ class BaseSideWindow(Actuator):
             if self.actuator_state != settings.ACTUATOR_AUTO:
                 break;
 
-            lux = self.get_environment_values()
-            # 現在の照度から、更新すべき新しい開度を取得する
-            new_aperture = get_aperture(self.id, lux, aperture)
+            # lux = self.get_environment_values()
+            temperature = self.get_environment_temperature()
+            # 現在の温度から、更新すべき新しい開度を取得する
+            new_aperture = get_aperture(self.id, temperature, aperture)
 
             aperture += 1
             self.newest_aperture = aperture
@@ -125,7 +125,6 @@ class BaseSideWindow(Actuator):
             new_aperture (float): 最終的に設定する開度
             aperture (float): 現在の開度
         """
-        closing_time = (aperture - new_aperture) * unit_time
         try:
             self.execute_reverse_motor(Value.ACTIVE)
 
@@ -150,9 +149,11 @@ class BaseSideWindow(Actuator):
             if self.actuator_state != settings.ACTUATOR_AUTO:
                 break;
 
-            lux = self.get_environment_values()
-            # 現在の照度から、更新すべき新しい開度を取得する
-            new_aperture = get_aperture(self.id, lux, aperture)
+            # lux = self.get_environment_values()
+            temperature = self.get_environment_temperature()
+
+            # 現在の温度から、更新すべき新しい開度を取得する
+            new_aperture = get_aperture(self.id, temperature, aperture)
 
             aperture -= 1
             self.newest_aperture = aperture
@@ -337,4 +338,4 @@ class BaseSideWindow(Actuator):
                 print(f"Unexpected {err=}, {type(err)=} \
                     at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}")
 
-            sleep(1)
+            # sleep(1)

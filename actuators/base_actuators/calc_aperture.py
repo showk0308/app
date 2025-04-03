@@ -324,8 +324,8 @@ def get_aperture(id: str, value: float, now_aperture: float) -> float:
     # 現在の照度が範囲以外のときは、温度(PATTERN_TEMP=0)範囲から、対応する開度を返す。
     elif str(PATTERN_TEMP) in states:
         print(f'PATTERN_TEMP:{states}')
-        return get_new_aperture(value, PATTERN_TEMP, now_aperture, states)
-
+        return get_temperature_aperture(value, PATTERN_TEMP, now_aperture, states)
+    
     return aperture
 
 def get_new_aperture(value: float, pattern_value: int, now_aperture: float, states: dict) -> float:
@@ -351,5 +351,36 @@ def get_new_aperture(value: float, pattern_value: int, now_aperture: float, stat
             list[0],    # 温度リスト ex.[28.0, 30.0, 33.0]
             now_aperture, 
             list[1])    # 開度リスト ex.[70.0, 20.0, 5.0]
+
+    return aperture
+
+def get_temperature_aperture(value: float, pattern_value: int, now_aperture: float, states: dict) -> float:
+    """
+    温度に基づいて開度を計算する関数。
+    温度が低いときは開度を小さくし、温度が高いときは開度を大きくします。
+    この関数は、現在の温度値と指定されたパターン値に基づいて、適切な開度を計算します。
+    開度は、指定された状態辞書（states）内の範囲情報を使用して決定されます。
+    Args:
+        value (float): 現在の温度値。
+        pattern_value (int): 使用するパターンを識別する値。
+        now_aperture (float): 現在の開度。
+        states (dict): 温度と開度の範囲情報を含む辞書。
+    Returns:
+        float: 計算された開度値。範囲が見つからない場合はデフォルト値0を返します。
+    """
+    # この関数の日本語ドキュメントを作成してください
+
+    aperture = 0
+    
+    list = get_range(str(pattern_value), states)
+    
+    if list != []:
+        aperture = condition_judgement(
+            value, 
+            list[0],    # 温度リスト ex.[28.0, 30.0, 33.0]
+            now_aperture, 
+            list[1],
+            min_aperture=0,
+            max_aperture=100)    # 開度リスト ex.[2.0, 60.0, 100.0]
 
     return aperture

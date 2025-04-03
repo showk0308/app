@@ -1,8 +1,6 @@
 import inspect
 from actuators.side_windows.base_side_window import BaseSideWindow
 from database.db_access import get_session
-from models.actuator_models import ActuatorGpioNo as agn
-from schemas.actuator_schemas import ActuatorGpioNoSchema, GpioNoSchema
 
 class SideWindow1(BaseSideWindow):
     """側窓制御クラス
@@ -39,42 +37,4 @@ class SideWindow1(BaseSideWindow):
             print(f'Error: {e} at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}')
             raise Exception('Failed to initialize SideWindow1 class.')
             
-    def get_gpio_no(self, id: str) -> ActuatorGpioNoSchema:
-        """
-        指定された制御機器IDに対応するGPIO番号と状態情報を取得します。
-
-        Args:
-            id (str): 制御機器ID。
-
-        Returns:
-            ActuatorGpioNoSchema: 指定された制御機器IDに関連付けられたGPIO番号と状態情報のリストを含むスキーマ。
-
-        Raises:
-            Exception: データベース接続やクエリ実行中にエラーが発生した場合。
-
-        Note:
-            - データベースから取得した情報を基に、`GpioNoSchema`オブジェクトのリストを作成します。
-            - 各オブジェクトには、制御機器ID、GPIO番号、状態が含まれます。
-        """
-        # ドキュメントは日本語で生成してください
-        with get_session() as db:
-            actuators = db.query(agn.actuator_id, agn.gpio_no, agn.state) \
-                            .filter(agn.actuator_id == id).all()
-
-            list = [val for val in actuators]  #[(key(id),gpio_no, state),((key(id),gpio_no, state),...]
-
-            list_gs = []
-            for val in list:
-                # actuator_id: str    # 制御機器ID
-                # gpio_no :int        # GPIO番号
-                # state: str          # 状態（説明文）
-                # builder_cd: str     # 作成者コード
-                # created_at: str     # 作成年月日時刻
-                # updator_cd: str     # 更新者コード
-                # mofified_at: str    # 更新年月日時刻
-                # actuator_id, gpio_no, state, *x = val
-                item = GpioNoSchema(actuator_id=val.actuator_id, gpio_no=val.gpio_no, state=val.state)
-                list_gs.append(item)
-
-            return ActuatorGpioNoSchema(gpionos=list_gs)
 
