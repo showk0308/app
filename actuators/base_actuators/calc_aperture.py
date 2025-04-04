@@ -255,7 +255,7 @@ def on_off_condition_judgement(
         returnにnotしているのは、condition_judgementが
         現在の温度が最大設定温度(stage)未満の時は１を返し,
         最大設定温度(stage)以上の場合は０を返すため
-        モータを回すためには１を返す必要がるので、notする
+        モータを回すためには１を返す必要があるので、notする
 
     Args:
         now_degree (int): 現在の温度または、照度

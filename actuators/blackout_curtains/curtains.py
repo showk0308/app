@@ -39,19 +39,6 @@ class BlackoutCurtain(Actuator):
             print(f'Error: {e} at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}')
             raise Exception('Failed to initialize Blackout Curtain class.')
 
-    # def init_gpio(self):
-    #     # chip = gpiod.Chip('gpiochip4', gpiod.Chip.OPEN_BY_NAME)
-
-    #     # # ラズパイ 16番ピン(GPIO23) - モータードライバー 5番(IN1)
-    #     self.in_1 = super().request_lines(23, Value.ACTIVE)
-    #     # self.in_1 = chip.get_line(23)
-    #     # self.in_1.request(consumer='in_1', type=gpiod.LINE_REQ_DIR_OUT, default_val=0)
-
-    #     # # ラズパイ 18番ピン(GPIO24) - モータードライバー 6番(IN2)
-    #     self.in_2 = super().request_lines(24, Value.ACTIVE)
-    #     # self.in_2 = chip.get_line(24)
-    #     # self.in_2.request(consumer='in_2', type=gpiod.LINE_REQ_DIR_OUT)
-
     def execute_forward_motor(self, action: Value):
         """
         モーターを順方向に動作させるためのアクションを実行します。
@@ -73,47 +60,17 @@ class BlackoutCurtain(Actuator):
         """
         self.set_line(self.reverse_motor_gpio, action)
 
-    # def forward_rotation_state(self, action: int):
-    #     """順回転方向モータ設定
-
-    #     Args:
-    #         action (int): モータードライバーの状態
-    #             Value.ACTIVE:順回転作動
-    #             Value.INACTIVE:順回転停止
-    #     """
-    #     # self.in_1.set_value(1)
-    #     print(f'forward_rotation_state.....')
-    #     self.in_1.set_value(23, action)
-        
-    # def reverse_rotation_state(self, action: int):
-    #     """逆回転方向モータ設定
-    #     Args:
-    #         action (int): モータードライバーの状態
-    #             Value.ACTIVE:逆回転作動
-    #             Value.INACTIVE:逆回転停止
-    #     """
-    #     # self.in_1.set_value(1)
-    #     print(f'reverse_rotation_state.....')
-    #     self.in_2.set_value(24, action)
-        
     def stop_curtain(self):
         """回転を停止する
         """
         print('stop rotation...')
         self.curtain_busy = False
 
-        # self.in_1.set_value(0)
-        # self.forward_rotation_state(Value.INACTIVE)
-        # self.in_2.set_value(0)
-        # self.reverse_rotation_state(Value.INACTIVE)
         try:
             self.execute_forward_motor(Value.INACTIVE)
             self.execute_reverse_motor(Value.INACTIVE)
         except Exception as e:
             print(f'Error: {e} at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}')
-
-        # self.in_1.release()
-        # self.in_2.release()
     
     def forced_stop(self):
         """カーテンが回転していれば、強制的に停止させる
@@ -131,13 +88,6 @@ class BlackoutCurtain(Actuator):
             aperture (float): 現在の開度
         """
         try:
-            # self.init_gpio()
-            # openning_time = (new_aperture - aperture) * unit_time
-            # print(f'open_curtain... rot time:{openning_time}')
-            # self.in_1.set_value(1)
-            # self.in_2.set_value(0)
-            # self.forward_rotation_state(Value.ACTIVE)
-            # self.reverse_rotation_state(Value.INACTIVE)
             self.execute_forward_motor(Value.ACTIVE)
 
             await self.increase_aperture(new_aperture, aperture, unit_time)
@@ -185,13 +135,6 @@ class BlackoutCurtain(Actuator):
         """
         closing_time = (aperture - new_aperture) * unit_time
         try:
-            # self.init_gpio()
-            # print(f'close_curtain... rot time:{closing_time}')
-            # self.in_1.set_value(0)
-            # self.in_2.set_value(1)
-
-            # self.forward_rotation_state(Value.INACTIVE)
-            # self.reverse_rotation_state(Value.ACTIVE)
             self.execute_reverse_motor(Value.ACTIVE)
 
             await self.decrease_aperture( new_aperture, aperture, unit_time)
@@ -246,12 +189,6 @@ class BlackoutCurtain(Actuator):
         try:
             if not self.curtain_busy:
                 self.curtain_busy = True
-                # self.init_gpio()
-                # print(f'forced open_curtain')
-                # self.in_1.set_value(1)
-                # self.in_2.set_value(0)
-                # self.forward_rotation_state(Value.ACTIVE)
-                # self.reverse_rotation_state(Value.INACTIVE)
                 self.execute_forward_motor(Value.ACTIVE)
 
             await self.forced_open(aperture, unit_time)
@@ -301,13 +238,6 @@ class BlackoutCurtain(Actuator):
         try:
             if not self.curtain_busy:
                 self.curtain_busy = True
-                # self.init_gpio()
-                # print(f'forced close_curtain')
-                # self.in_1.set_value(0)
-                # self.in_2.set_value(1)
-                # self.in_2.set_value(Value.ACTIVE)
-                # self.forward_rotation_state(Value.INACTIVE)
-                # self.reverse_rotation_state(Value.ACTIVE)
                 self.execute_reverse_motor(Value.ACTIVE)
             
             await self.forced_close(aperture, unit_time)

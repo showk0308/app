@@ -1,13 +1,11 @@
 import asyncio
-import gpiod
+import inspect
 from time import sleep
-from contextlib import contextmanager
 from models.actuator_models import EnvironmentValues as ev
 from database.db_access import get_session
 from actuators.base_actuators.base_actuator import Actuator
 from actuators.base_actuators.calc_aperture import \
     get_degrees_apertures, \
-    condition_judgement, \
     on_off_condition_judgement
 from config import settings
 from gpiod.line import Value
@@ -23,21 +21,24 @@ class CirculatorFan(Actuator):
         self.actuator_state=self.PAUSED
         self.circulator_busy = True    # 循環扇稼働状態 True-> 回転中
 
-    def init_gpio(self):
-        """gpio初期化
-        """
-        # chip = gpiod.Chip('gpiochip4', gpiod.Chip.OPEN_BY_NAME)
-        # # ラズパイ 17番ピン(GPIO17) IN1
-        # self.relay_1 = chip.get_line(17)
-        # self.relay_1.request(consumer='relay_1', type=gpiod.LINE_REQ_DIR_OUT)
-        self.circulator = super().request_lines(17, Value.INACTIVE)
+        try:
+            # GPIO番号17を使用
+            nos = self.get_gpio_no(id)
+            print(f'gpio_no: {nos.gpionos[0].gpio_no}')
+            if len(nos.gpionos) != 1:
+                raise Exception('Invalid GPIO number count.')
 
-    def rotation_state(self, action: int):
+            self.gpio_no = int(nos.gpionos[0].gpio_no)
+        except Exception as e:
+            print(f'Error: {e} at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}')
+            raise Exception('Failed to initialize CirculatorFan class.')
+
+    def rotation_state(self, action: Value):
         """循環扇の回転状態を設定する
         Args:
             action (int): Value.ACTIVE:ON, Value.INACTIVE:OFF
         """
-        self.circulator.set_value(17, action)
+        self.set_line(self.gpio_no, action)
 
     async def turn_on(self):
         """循環扇オン
@@ -47,8 +48,7 @@ class CirculatorFan(Actuator):
         """
         try:
             if not self.circulator_busy:
-                print('Relay_1 open...')
-                # self.relay_1.set_value(1)
+                print('Circulator Relay_1 open...')
                 self.rotation_state(Value.ACTIVE)
                 self.circulator_busy = True
 
@@ -62,8 +62,7 @@ class CirculatorFan(Actuator):
         """
         try:
             if self.circulator_busy:
-                print('Relay_1 close...')
-                # self.relay_1.set_value(0)
+                print('Circulator Relay_1 close...')
                 self.rotation_state(Value.INACTIVE)
                 self.circulator_busy = False
 
@@ -109,8 +108,6 @@ class CirculatorFan(Actuator):
         """
         print(f'circulator task args:{args}')
 
-        self.init_gpio()
-
         while True:
             try:
                 # environment_valuesテーブルから、現在の環境計測値（温度）を取得する
@@ -142,6 +139,7 @@ class CirculatorFan(Actuator):
                     await asyncio.sleep(1)
 
             except Exception as err:
-                print(f"Unexpected {err=}, {type(err)=}")
+                print(f'Unexpected Error: {err=} , {type(err)=} \
+                    at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}')
 
             sleep(1)
