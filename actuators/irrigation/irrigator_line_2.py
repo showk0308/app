@@ -1,4 +1,4 @@
-import gpiod
+import inspect
 from actuators.irrigation.irrigation_data import IrrigationLine
 from actuators.irrigation.base_irrigator import Irrigator
 
