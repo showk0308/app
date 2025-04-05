@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import sqlalchemy
 import gpiod
 from gpiod.line import Direction, Value
@@ -42,7 +43,7 @@ class Irrigator(Actuator):
                 print('line open...')
                 # gpiod.Chip.target
                 # self.current_line.target.set_value(1)
-                super().request_lines(self.current_line.gpio_no, Value.ACTIVE).set_value(Value.ACTIVE)
+                self.set_line(self.current_line.gpio_no, Value.ACTIVE)
                 self.current_line.busy = True
 
         except OSError as ex:
@@ -58,8 +59,7 @@ class Irrigator(Actuator):
         try:
             if self.current_line.busy:
                 print('line close...')
-                # self.current_line.target.set_value(0)
-                super().request_lines(self.current_line.gpio_no).set_value(Value.INACTIVE)
+                self.set_line(self.current_line.gpio_no, Value.INACTIVE)
                 self.current_line.busy = False
 
         except OSError as ex:

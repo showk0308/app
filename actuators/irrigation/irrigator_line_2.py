@@ -14,20 +14,24 @@ class IrrigatorLine2(Irrigator):
         Args:
             id (str): 潅水ラインID
         """        
-        super().__init__(id)
+        try:
+            # GPIO番号17を使用
+            nos = self.get_gpio_no(id)
+            print(f'gpio_no: {nos.gpionos[0].gpio_no}')
+            if len(nos.gpionos) != 1:
+                raise Exception('Invalid GPIO number count.')
 
-        self.current_line = IrrigationLine(
-            line_no=2, 
-            busy=False,
-            gpio_no=22)
+            gpio_no = int(nos.gpionos[0].gpio_no)
+    
+            super().__init__(id)
         
-        # 潅水ライン2 ラズパイ 15番ピン(GPIO22) - SSR IN4
-        # chip = gpiod.Chip('gpiochip4', gpiod.Chip.OPEN_BY_NAME)
-        # self.current_line.target = chip.get_line(22)
-        # self.current_line.target.request(consumer='in_4', type=gpiod.LINE_REQ_DIR_OUT, default_val=0)
-        # chip = gpiod.Chip('/dev/gpiochip4')
-        # self.current_line.target = chip.get_line(27)
-        # self.current_line.target = chip
-        # self.current_line.gpio_no = 27
+            self.current_line = IrrigationLine(
+                line_no=2, 
+                busy=False,
+                gpio_no=gpio_no)
+
+        except Exception as e:
+            print(f'Error: {e} at {inspect.currentframe().f_code.co_name} in {inspect.getfile(inspect.currentframe())}')
+            raise Exception('Failed to initialize IrrigatorLine1 class.')
 
 

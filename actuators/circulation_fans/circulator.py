@@ -19,7 +19,7 @@ class CirculatorFan(Actuator):
         """
         super().__init__(id)
         self.actuator_state=self.PAUSED
-        self.circulator_busy = True    # 循環扇稼働状態 True-> 回転中
+        self.circulator_busy = False    # 循環扇稼働状態 True-> 回転中
 
         try:
             # GPIO番号17を使用
