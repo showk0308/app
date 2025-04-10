@@ -19,7 +19,6 @@ class CirculatorFan(Actuator):
         """
         super().__init__(id)
         self.actuator_state=self.PAUSED
-        self.circulator_busy = False    # 循環扇稼働状態 True-> 回転中
 
         try:
             # GPIO番号17を使用
@@ -47,10 +46,8 @@ class CirculatorFan(Actuator):
             rotation_time (float): 回転時間
         """
         try:
-            # if not self.circulator_busy:
             print('Circulator Relay_1 open...')
             self.rotation_state(Value.ACTIVE)
-            # self.circulator_busy = True
 
             await asyncio.sleep(1)
 
@@ -61,10 +58,8 @@ class CirculatorFan(Actuator):
         """循環扇オフ
         """
         try:
-            # if self.circulator_busy:
             print('Circulator Relay_1 close...')
             self.rotation_state(Value.INACTIVE)
-            # self.circulator_busy = False
 
             await asyncio.sleep(1)
 
